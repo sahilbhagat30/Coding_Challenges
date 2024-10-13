@@ -22,24 +22,11 @@ Given tables with information on Snapchat users, including their ages and time s
 ## Expected Output
 | age_bucket | send_perc | open_perc |
 |------------|-----------|-----------|
-| 26-30      | 65.40     | 34.60     |
-| 31-35      | 43.75     | 56.25     |
+| 21-25      | 35.56     | 64.44     |
+| 26-30      | 43.18     | 56.82     |
+| 31-35      | 49.15     | 50.85     |
 
 ## Solution
-
-```sql
-SELECT ab.age_bucket,
-ROUND(SUM(CASE WHEN activity_type = 'send' THEN a.time_spent ELSE 0 END) / 
-      SUM(CASE WHEN activity_type IN ('send','open') THEN a.time_spent ELSE 0 END) * 100, 2) AS send_perc,
-ROUND(SUM(CASE WHEN activity_type = 'open' THEN a.time_spent ELSE 0 END) / 
-      SUM(CASE WHEN activity_type IN ('send','open') THEN a.time_spent ELSE 0 END) * 100, 2) AS open_perc
-FROM activities a
-JOIN age_breakdown ab ON a.user_id = ab.user_id
-GROUP BY ab.age_bucket
-```
-
-## Alternative Approaches
-A more efficient and readable approach uses a Common Table Expression (CTE) to first calculate the total times and then compute percentages:
 
 ```sql
 WITH snap_stats AS (
@@ -60,3 +47,61 @@ SELECT
 FROM snap_stats
 ORDER BY age_bucket;
 ```
+
+## Explanation
+
+1. We start by creating a Common Table Expression (CTE) named `snap_stats`:
+   - We join the `activities` table with the `age_breakdown` table using the `user_id` field.
+   - We use `SUM` and `CASE` statements to calculate the total time spent on sending and opening snaps separately, as well as the total time for both activities.
+   - We filter activities to include only 'send' and 'open' types.
+   - Results are grouped by age bucket.
+
+2. In the main query, we use the `snap_stats` CTE to calculate percentages:
+   - We divide the time spent on each activity by the total time and multiply by 100.0 to get percentages.
+   - We use `ROUND` to limit the result to 2 decimal places.
+
+3. Finally, we order the results by age bucket for consistent output.
+
+## Complexity Analysis
+- Time Complexity: O(n), where n is the number of rows in the activities table. We need to scan through all relevant activities once.
+- Space Complexity: O(m), where m is the number of distinct age buckets. This is the space needed to store the grouped results in the CTE and final output.
+
+## Alternative Approaches
+An alternative approach could directly calculate percentages without using a CTE, but it would be less readable and potentially less efficient:
+
+```sql
+SELECT ab.age_bucket,
+ROUND(SUM(CASE WHEN activity_type = 'send' THEN a.time_spent ELSE 0 END) / 
+      SUM(CASE WHEN activity_type IN ('send','open') THEN a.time_spent ELSE 0 END) * 100, 2) AS send_perc,
+ROUND(SUM(CASE WHEN activity_type = 'open' THEN a.time_spent ELSE 0 END) / 
+      SUM(CASE WHEN activity_type IN ('send','open') THEN a.time_spent ELSE 0 END) * 100, 2) AS open_perc
+FROM activities a
+JOIN age_breakdown ab ON a.user_id = ab.user_id
+GROUP BY ab.age_bucket
+ORDER BY ab.age_bucket;
+```
+
+## Key Concepts
+- Common Table Expressions (CTE)
+- JOIN operations
+- Aggregate functions (SUM, ROUND)
+- CASE statements
+- Percentage calculations
+
+## Additional Notes
+- This solution assumes that there are activities of type 'send' and 'open' for each age bucket. If an age bucket has no activities, it won't appear in the output.
+- Using `100.0` instead of `100` ensures floating-point division, avoiding potential issues with integer division.
+- The `ORDER BY` clause ensures consistent output ordering, which is important for presentation and testing.
+
+## Difficulty
+Medium
+
+## Related Topics
+- Data Manipulation
+- Aggregation
+- Percentage Calculations
+- Grouping
+- Common Table Expressions
+
+## Source
+[DataLemur](https://datalemur.com/questions/time-spent-snaps)
