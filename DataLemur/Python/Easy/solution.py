@@ -1,32 +1,32 @@
-def factorial(n):
-    if n == 0:
-        return 1
-    elif n == 1:
-        return 1
-    else:
-        factorial = n
-        while n > 1:
-            factorial *= (n - 1)
-            n -= 1
-        return factorial
+import math
 
-def test_factorial():
-    test_cases = [
-        (0, 1),  # 0! = 1
-        (1, 1),  # 1! = 1
-        (2, 2),  # 2! = 2
-        (3, 6),  # 3! = 6
-        (4, 24), # 4! = 24
-        (5, 120),# 5! = 120
-        (6, 720) # 6! = 720
-    ]
+def is_prime(n):
+    # Handle edge cases for numbers less than or equal to 1
+    if n <= 1:
+        return False
+    # Handle small primes directly
+    if n <= 3:
+        return True
+    # Exclude even numbers and multiples of 3
+    if n % 2 == 0 or n % 3 == 0:
+        return False
     
-    for n, expected in test_cases:
-        result = factorial(n)
-        assert result == expected, f"Test failed for n={n}: expected {expected}, got {result}"
-    
-    print("All tests passed!")
+    # Only check divisibility for numbers of the form 6k ± 1 up to the square root of n
+    for i in range(5, int(math.sqrt(n)) + 1, 6):
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+    return True
+
+def test_prime():
+    prime_count = 0
+    prime_list = []
+    nums = [326, 303, 313, 351]
+    for i in nums:
+        if is_prime(i):
+            prime_count += 1
+            prime_list.append(i)
+    return prime_count, prime_list
 
 # Example usage
 if __name__ == "__main__":
-    test_factorial()
+    print(test_prime())
