@@ -30,7 +30,7 @@ FROM
     FROM 
         forbes_global_2010_2014
 ) AS t 
-WHERE t.company_rank < 4;
+WHERE t.company_rank <= 4;
 ```
 
 #### Explanation:
