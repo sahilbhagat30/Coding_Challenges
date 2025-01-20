@@ -68,6 +68,8 @@ JOIN
     users u ON u.user_id = mf.friend_id;
 ```
 
+## Optimized 
+
 ---
 
 ## Explanation
